@@ -13,7 +13,7 @@ Procedure:
 import numpy as np 
 import matplotlib.pyplot as plt 
 import pandas as pd 
-import datapreprocessing.py 
+import datapreprocessing as dpp
 
 
 
@@ -80,44 +80,45 @@ intra_dataset = {
 }
 
 #dictionaries for code-numbers and text representations
-alt = get_key_value_dict(dfterr, 'alternative', 'alternative_txt')
-atk_type = get_key_value_dict(dfterr, 'attacktype1', 'attacktype1_txt') #int val
-target = get_key_value_dict(dfterr, 'targtype1', 'targtype1_txt') #int val
-subtarget = get_key_value_dict(dfterr, 'targsubtype1', 'targsubtype1_txt')
-nationality = get_key_value_dict(dfterr, 'natlty1', 'natlty1_txt') #ntlty2 has 2 keys to store
-claim_mode = get_key_value_dict(dfterr, 'claimmode', 'claimmode_txt')
-weapon_type = get_key_value_dict(dfterr, 'weaptype1', 'weaptype1_txt') #has int val, others have float
-weapon_subtype = get_key_value_dict(dfterr, 'weapsubtype1', 'weapsubtype1_txt')
-prop_damage = get_key_value_dict(dfterr, 'propextent', 'propextent_txt')
-hostage_outcome = get_key_value_dict(dfterr, 'hostkidoutcome', 'hostkidoutcome_txt')
+alt = dpp.get_key_value_dict(dfterr, 'alternative', 'alternative_txt')
+atk_type = dpp.get_key_value_dict(dfterr, 'attacktype1', 'attacktype1_txt') #int val
+target = dpp.get_key_value_dict(dfterr, 'targtype1', 'targtype1_txt') #int val
+subtarget = dpp.get_key_value_dict(dfterr, 'targsubtype1', 'targsubtype1_txt')
+nationality = dpp.get_key_value_dict(dfterr, 'natlty1', 'natlty1_txt') #ntlty2 has 2 keys to store
+claim_mode = dpp.get_key_value_dict(dfterr, 'claimmode', 'claimmode_txt')
+weapon_type = dpp.get_key_value_dict(dfterr, 'weaptype1', 'weaptype1_txt') #has int val, others have float
+weapon_subtype = dpp.get_key_value_dict(dfterr, 'weapsubtype1', 'weapsubtype1_txt')
+prop_damage = dpp.get_key_value_dict(dfterr, 'propextent', 'propextent_txt')
+hostage_outcome = dpp.get_key_value_dict(dfterr, 'hostkidoutcome', 'hostkidoutcome_txt')
 
-pov_indicator_dict = get_key_value_dict(dfpov, 'Indicator Code', 'Indicator Name')
-health_indicator_dict = get_key_value_dict(dfhealth, 'Indicator Code', 'Indicator Name')
+pov_indicator_dict = dpp.get_key_value_dict(dfpov, 'Indicator Code', 'Indicator Name')
+health_indicator_dict = dpp.get_key_value_dict(dfhealth, 'Indicator Code', 'Indicator Name')
 
 
 #remove unecessary columns
 dfterr.drop(terrdlist, axis=1)
 
 #merge attribute values using country dictionaries
-merge_attribute_values(dfterr, 'country_txt', intra_dataset)
-merge_attribute_values(dfpov, 'Country Name', inter_dataset)
-merge_attribute_values(dfhealth, 'Country Name', inter_dataset)
+dpp.merge_attribute_values(dfterr, 'country_txt', intra_dataset)
+dpp.merge_attribute_values(dfpov, 'Country Name', inter_dataset)
+dpp.merge_attribute_values(dfhealth, 'Country Name', inter_dataset)
 
 #get list of countries for each data set 
 terrcountrylist = dfterr['country_txt'].unique()
 
-pov_country_generator = attribute_list_generator(dfpov, 'Country Name', True)
+pov_country_generator = dpp.attribute_list_generator(dfpov, 'Country Name', True)
 pov_country_list = [country for country in pov_country_generator(terrcountrylist)]
 
-health_country_generator = attribute_list_generator(dfhealth, 'Country Name', True)
+health_country_generator = dpp.attribute_list_generator(dfhealth, 'Country Name', True)
 health_country_list = [country for country in health_country_generator(terrcountrylist)]
 
 # pipe the dataset transformations with respect to the country, rejoin for integration 
-pov_country_sets = [pre_merge_data_transformation(dfpov, c, povdlist) for c in pov_country_list]
-health_country_sets = [pre_merge_data_transformation(dfhealth, c, healthdlist) for c in health_country_list]
+pov_country_sets = [dpp.pre_merge_data_transformation(dfpov, c, povdlist) for c in pov_country_list]
+health_country_sets = [dpp.pre_merge_data_transformation(dfhealth, c, healthdlist) for c in health_country_list]
 tf_pov_data = pd.concat(pov_country_sets)
 tf_health_data = pd.concat(health_country_sets)
 
 #integrate all three datasets
-data_store = pd.merge(dfterr, tf_pov_data, how='left', on=['iyear', 'country_txt'])
-               .merge(tf_health_data, how='left', on=['iyear', 'country_txt'])
+data_store = (pd.merge(dfterr, tf_pov_data, how='left', on=['iyear', 'country_txt'])
+                .merge(tf_health_data, how='left', on=['iyear', 'country_txt'])
+                )       

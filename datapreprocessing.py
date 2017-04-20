@@ -1,5 +1,9 @@
 
 
+import numpy as np 
+import matplotlib.pyplot as plt 
+import pandas as pd 
+
 #to create dicts for text representations of encoded attributes 
 #ex: indicator dicts
 def get_key_value_dict(df, code, name):
@@ -44,7 +48,7 @@ def is_usable(df, attr, axis=1, thresh=.3):
 #so it can be merged with the terrorism data set 
 def pre_merge_data_transformation(df, country, droplist):   
     return (df.loc[df['Country Name'] == country]
-              .drop(dfpov.loc[:, droplist], axis=1)
+              .drop(df.loc[:, droplist], axis=1)
               .set_index(['Indicator Code'])
               .rename_axis(None).T[2:]
               .assign(country_txt=lambda x: pd.Series([country for i in range(len(x))]).values)
@@ -53,4 +57,3 @@ def pre_merge_data_transformation(df, country, droplist):
               .assign(iyear=lambda x: pd.to_numeric(x['iyear'], errors='coerce'))
            )
 
-#
