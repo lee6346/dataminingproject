@@ -1,0 +1,12 @@
+packages:
+
+numpy
+scipy
+matplotlib
+pandas
+ipython(jupyter)
+scikit learn
+seaborn]
+statsmodels
+(need connector for pandas to )
+
