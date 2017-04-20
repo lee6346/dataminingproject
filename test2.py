@@ -17,9 +17,10 @@ import datapreprocessing as dpp
 
 
 
-dfterr = pd.read_csv('globalterrorismdb_0616dist.csv').replace('.', np.NaN)
-dfpov = pd.read_csv('PovStatsData.csv')
-dfhealth = pd.read_csv('health_nutrition.csv')
+enc = 'latin1'
+dfterr = pd.read_csv('globalterrorismdb_0616dist.csv', encoding=enc).replace('.', np.NaN)
+dfpov = pd.read_csv('PovStatsData.csv', encoding=enc)
+dfhealth = pd.read_csv('health_nutrition.csv', encoding=enc)
 
 
 
@@ -87,7 +88,7 @@ subtarget = dpp.get_key_value_dict(dfterr, 'targsubtype1', 'targsubtype1_txt')
 nationality = dpp.get_key_value_dict(dfterr, 'natlty1', 'natlty1_txt') #ntlty2 has 2 keys to store
 claim_mode = dpp.get_key_value_dict(dfterr, 'claimmode', 'claimmode_txt')
 weapon_type = dpp.get_key_value_dict(dfterr, 'weaptype1', 'weaptype1_txt') #has int val, others have float
-weapon_subtype = get_key_value_dict(dfterr, 'weapsubtype1', 'weapsubtype1_txt')
+weapon_subtype = dpp.get_key_value_dict(dfterr, 'weapsubtype1', 'weapsubtype1_txt')
 prop_damage = dpp.get_key_value_dict(dfterr, 'propextent', 'propextent_txt')
 hostage_outcome = dpp.get_key_value_dict(dfterr, 'hostkidoutcome', 'hostkidoutcome_txt')
 
