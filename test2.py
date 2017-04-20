@@ -17,9 +17,10 @@ import datapreprocessing as dpp
 
 
 
-dfterr = pd.read_csv('globalterrorismdb_0616dist.csv').replace('.', np.NaN)
-dfpov = pd.read_csv('PovStatsData.csv')
-dfhealth = pd.read_csv('health_nutrition.csv')
+enc = 'latin1'
+dfterr = pd.read_csv('globalterrorismdb_0616dist.csv', encoding=enc).replace('.', np.NaN)
+dfpov = pd.read_csv('PovStatsData.csv', encoding=enc)
+dfhealth = pd.read_csv('health_nutrition.csv', encoding=enc)
 
 
 
@@ -122,3 +123,4 @@ tf_health_data = pd.concat(health_country_sets)
 data_store = (pd.merge(dfterr, tf_pov_data, how='left', on=['iyear', 'country_txt'])
                 .merge(tf_health_data, how='left', on=['iyear', 'country_txt'])
                 )       
+
