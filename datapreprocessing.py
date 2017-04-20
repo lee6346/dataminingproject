@@ -4,13 +4,21 @@ import numpy as np
 import matplotlib.pyplot as plt 
 import pandas as pd 
 
-#to create dicts for text representations of encoded attributes 
-#ex: indicator dicts
+
+
+"""
+The following are generic functions that are used 
+for preprocessing but can be used during other processes
+"""
+
+# create dicts from two columns in a dataframe
+# use case: when two columns are similar or represent each other in some way 
 def get_key_value_dict(df, code, name):
     return dict(zip(df.loc[:,code].unique(), df.loc[:,name].unique()))
 
-#returns/generates attribute lists that can be merged
-#will use to make pov_country_list and health_country_list
+
+# generates list of specified items from dataframe
+# use case: make list of country names from different data sets for future comparison
 def attribute_list_generator(df, attr, transform=False):
     initial_list = df.loc[:,attr].unique()
     if not transform:
@@ -21,31 +29,36 @@ def attribute_list_generator(df, attr, transform=False):
                 yield item 
     return attribute_transform
 
-#merges attribute values using a dictionary (ex: country name discrepancies between two data sets)
+
+# merges attribute values using a dictionary 
+# use case: country name discrepancies between two data sets
 def merge_attribute_values(df, attr, merge_dict):
     for key in merge_dict:
         df.loc[df[attr] == key, attr] = merge_dict[key]
 
 
-#dropping attributes
-def drop_attributes(df, attr_list, ax=1, ip=False):
-    return df.drop(df.columns[attr_list], axis=ax, inplace=ip)
+# replace values with new ones
+# use case: imonth column uses 0 as a month, which we would like to be 1
+def replace_column_values(df, attribute, current_val, new_val):
+    df.loc[df[attribute] == current_val, attribute] = new_val
+    return df 
 
-#set blank attributes to NaN
-def set_to_null(df, attr, null_values):
-    df.loc[df[attr].isin(null_values), attr] = np.nan
 
-#get np array of a Series 
-def get_column_values(df, col):
-    return df[col].values
-
-#should only use when all blank attributes have been converted to numpy.nan 
+# used to determine if a column/row has enough non null entries to be usable 
+# use case: use to determine whether row/columns should be dropped/ignored
 def is_usable(df, attr, axis=1, thresh=.3):
     return df.loc[:, attr].isnull().sum() / float(df.shape[0]) > thresh
 
-#this function is specifically for the health/poverty attributes 
-#it is chain of methods that drop columns, tranpose the shape, modifies data 
-#so it can be merged with the terrorism data set 
+
+
+"""
+The following functions are specific for a type of data set or frame
+and should limited in use 
+"""
+
+# used with health/poverty data structure. The chain transitions
+# from dropping attributes using droplist, modifying indices, 
+# transforming shapes, etc. until the df is ready to integrate. 
 def pre_merge_data_transformation(df, country, droplist):   
     return (df.loc[df['Country Name'] == country]
               .drop(df.loc[:, droplist], axis=1)
@@ -57,3 +70,22 @@ def pre_merge_data_transformation(df, country, droplist):
               .assign(iyear=lambda x: pd.to_numeric(x['iyear'], errors='coerce'))
            )
 
+
+# used with health/poverty data structure to drop unreliable attributes
+# reliability fails if over half the column is null values
+def drop_unreliable_attributes(df, attribute, value , min_thresh=.5, freq=.5):
+    return ( df.loc[df[attribute] == value]
+               .dropna(axis=1, thresh=(min_thresh * len(df)))
+            )
+    
+# used with terrorism data to modify the date columns:
+# 0 -> 1 for months/days, column name iyear -> year, 
+# convert to date_format, then set as index for the data set 
+# while removing them from ... 
+def date_columns_to_index(df):
+    return ( df.replace('.', np.NaN)
+            .pipe(replace_column_values, 'imonth', 0, 1)
+            .pipe(replace_column_values, 'iday', 0, 1)
+            .rename(index=str, columns={'iyear': 'year', 'imonth': 'month', 'iday': 'day'})
+            #.apply(lambda x: pd.to_datetime, x['year', 'month', 'day'])
+            )

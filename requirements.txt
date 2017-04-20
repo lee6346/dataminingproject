@@ -6,7 +6,7 @@ matplotlib
 pandas
 ipython(jupyter)
 scikit learn
-seaborn]
+seaborn
 statsmodels
-(need connector for pandas to )
-
+sklearn-pandas : pipe i/o between the two 
+    https://github.com/paulgb/sklearn-pandas

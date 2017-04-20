@@ -1,26 +1,26 @@
 """
-Procedure:
+Pre-Process Procedure:
 1. import libraries
 2. read in csv files 
-3. fill all blanks/periods with np.nan
+3. correct any misinterpeted and null entries 
 4. create all dictionaries to map codes to names
 5. remove all unecessary columns 
 6. transform pov and health data 
 7. merge with terrorism data with country/year as keys
 
 """
-
+"""
+2. make iyear, imonth, iday the date index for terr 
+"""
 import numpy as np 
 import matplotlib.pyplot as plt 
 import pandas as pd 
 import datapreprocessing as dpp
 
 
-
-enc = 'latin1'
-dfterr = pd.read_csv('globalterrorismdb_0616dist.csv', encoding=enc).replace('.', np.NaN)
-dfpov = pd.read_csv('PovStatsData.csv', encoding=enc)
-dfhealth = pd.read_csv('health_nutrition.csv', encoding=enc)
+dfterr = pd.read_csv('globalterrorismdb_0616dist.csv')
+dfpov = pd.read_csv('PovStatsData.csv')
+dfhealth = pd.read_csv('health_nutrition.csv')
 
 
 
@@ -97,7 +97,7 @@ health_indicator_dict = dpp.get_key_value_dict(dfhealth, 'Indicator Code', 'Indi
 
 
 #remove unecessary columns
-dfterr.drop(terrdlist, axis=1)
+dfterr.drop(terrdlist, axis=1, inplace=True)
 
 #merge attribute values using country dictionaries
 dpp.merge_attribute_values(dfterr, 'country_txt', intra_dataset)
@@ -120,7 +120,7 @@ tf_pov_data = pd.concat(pov_country_sets)
 tf_health_data = pd.concat(health_country_sets)
 
 #integrate all three datasets
-data_store = (pd.merge(dfterr, tf_pov_data, how='left', on=['iyear', 'country_txt'])
-                .merge(tf_health_data, how='left', on=['iyear', 'country_txt'])
+data_store = (dfterr.merge(tf_pov_data, how='left', on=['year', 'country_txt'])
+                .merge(tf_health_data, how='left', on=['year', 'country_txt'])
                 )       
 

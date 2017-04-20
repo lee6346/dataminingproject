@@ -2,6 +2,7 @@
 .git
 *.pyc
 __init__.py
+*.zip
 
 *.csv
 __pycache__/
