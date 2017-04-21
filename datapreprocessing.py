@@ -71,13 +71,8 @@ def pre_merge_data_transformation(df, country, droplist):
            )
 
 
-# used with health/poverty data structure to drop unreliable attributes
-# reliability fails if over half the column is null values
-def drop_unreliable_attributes(df, attribute, value , min_thresh=.5, freq=.5):
-    return ( df.loc[df[attribute] == value]
-               .dropna(axis=1, thresh=(min_thresh * len(df)))
-            )
     
+
 # used with terrorism data to modify the date columns:
 # 0 -> 1 for months/days, column name iyear -> year, 
 # convert to date_format, then set as index for the data set 
@@ -87,5 +82,4 @@ def date_columns_to_index(df):
             .pipe(replace_column_values, 'imonth', 0, 1)
             .pipe(replace_column_values, 'iday', 0, 1)
             .rename(index=str, columns={'iyear': 'year', 'imonth': 'month', 'iday': 'day'})
-            #.apply(lambda x: pd.to_datetime, x['year', 'month', 'day'])
             )

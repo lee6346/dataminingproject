@@ -31,3 +31,5 @@ def total_grouping(df, total_attr, start=1974):
             )
 
 
+
+def get_numeric_attributes(df, ):

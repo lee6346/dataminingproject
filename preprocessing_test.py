@@ -9,9 +9,7 @@ Pre-Process Procedure:
 7. merge with terrorism data with country/year as keys
 
 """
-"""
-2. make iyear, imonth, iday the date index for terr 
-"""
+
 import numpy as np 
 import matplotlib.pyplot as plt 
 import pandas as pd 
@@ -19,12 +17,12 @@ import datapreprocessing as dpp
 
 
 dfterr = pd.read_csv('globalterrorismdb_0616dist.csv')
-dfpov = pd.read_csv('PovStatsData.csv')
-dfhealth = pd.read_csv('health_nutrition.csv')
+dfpov = pd.read_csv('poverty.csv')
+dfhealth = pd.read_csv('health.csv')
 
 
 
-#data attributes that aren't needed
+#column attributes that aren't needed
 terrdlist = ['eventid', 'approxdate', 'ingroup', 'ingroup2', 'ingroup3',
                 'related', 'specificity', 'INT_ANY', 'weapdetail', 'summary',
                 'motive', 'propcomment', 'ransomnote', 'addnotes', 'alternative_txt',
@@ -35,13 +33,15 @@ terrdlist = ['eventid', 'approxdate', 'ingroup', 'ingroup2', 'ingroup3',
                 'weapsubtype1_txt', 'weaptype2_txt', 'weapsubtype2_txt', 'weaptype3_txt',
                 'weapsubtype3_txt', 'weaptype4_txt', 'weapsubtype4_txt', 'propextent_txt',
                 'hostkidoutcome_txt', 'region', 'country']
+
 povdlist = ['Country Code', 'Indicator Name', 'Unnamed: 46']
+
 healthdlist = ['Country Code', 'Indicator Name', 'Unnamed: 60']
 
 #dictionaries to merge same countries
+
 inter_dataset = {
     'Korea, Dem. People\xe2\x80\x99s Rep.' : 'North Korea',
-    "Korea, Dem. People’s Rep." : 'North Korea',
     'Korea, Rep.' : 'South Korea',
     'Kyrgyz Republic' : 'Kyrgyzstan',
     'Congo, Dem. Rep.' : 'Democratic Republic of the Congo',
@@ -82,21 +82,20 @@ intra_dataset = {
 
 #dictionaries for code-numbers and text representations
 alt = dpp.get_key_value_dict(dfterr, 'alternative', 'alternative_txt')
-atk_type = dpp.get_key_value_dict(dfterr, 'attacktype1', 'attacktype1_txt') #int val
-target = dpp.get_key_value_dict(dfterr, 'targtype1', 'targtype1_txt') #int val
+atk_type = dpp.get_key_value_dict(dfterr, 'attacktype1', 'attacktype1_txt') 
+target = dpp.get_key_value_dict(dfterr, 'targtype1', 'targtype1_txt')
 subtarget = dpp.get_key_value_dict(dfterr, 'targsubtype1', 'targsubtype1_txt')
-nationality = dpp.get_key_value_dict(dfterr, 'natlty1', 'natlty1_txt') #ntlty2 has 2 keys to store
+nationality = dpp.get_key_value_dict(dfterr, 'natlty1', 'natlty1_txt') 
 claim_mode = dpp.get_key_value_dict(dfterr, 'claimmode', 'claimmode_txt')
-weapon_type = dpp.get_key_value_dict(dfterr, 'weaptype1', 'weaptype1_txt') #has int val, others have float
+weapon_type = dpp.get_key_value_dict(dfterr, 'weaptype1', 'weaptype1_txt') 
 weapon_subtype = dpp.get_key_value_dict(dfterr, 'weapsubtype1', 'weapsubtype1_txt')
 prop_damage = dpp.get_key_value_dict(dfterr, 'propextent', 'propextent_txt')
 hostage_outcome = dpp.get_key_value_dict(dfterr, 'hostkidoutcome', 'hostkidoutcome_txt')
-
 pov_indicator_dict = dpp.get_key_value_dict(dfpov, 'Indicator Code', 'Indicator Name')
 health_indicator_dict = dpp.get_key_value_dict(dfhealth, 'Indicator Code', 'Indicator Name')
 
 
-#remove unecessary columns
+#remove irrelevant columns from data sets 
 dfterr.drop(terrdlist, axis=1, inplace=True)
 
 #merge attribute values using country dictionaries
@@ -120,7 +119,8 @@ tf_pov_data = pd.concat(pov_country_sets)
 tf_health_data = pd.concat(health_country_sets)
 
 #integrate all three datasets
-data_store = (dfterr.merge(tf_pov_data, how='left', on=['year', 'country_txt'])
-                .merge(tf_health_data, how='left', on=['year', 'country_txt'])
-                )       
+data_store = (dfterr.merge(tf_pov_data, how='left', on=['iyear', 'country_txt'])
+                .merge(tf_health_data, how='left', on=['iyear', 'country_txt'])
+                )    
+
 
